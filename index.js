@@ -5,10 +5,15 @@ const path = require('path');
 
 const app = express();
 
-// 1. Connect to MongoDB
-mongoose.connect('mongodb://localhost:27017/student_sympo')
-    .then(() => console.log('✅ Connected to MongoDB'))
-    .catch(err => console.error('❌ MongoDB Connection Error:', err));
+// --- DATABASE CONNECTION ---
+// Using MongoDB Atlas Connection String provided by user
+const dbURI = "mongodb+srv://720723110803_db_user:darling%40123@cluster0.ddwhmyt.mongodb.net/symposiumDB?retryWrites=true&w=majority&appName=Cluster0";
+
+mongoose.connect(dbURI)
+    .then(() => console.log('✅ Connected to MongoDB Atlas'))
+    .catch(err => {
+        console.error('❌ MongoDB Connection Error:', err);
+    });
 
 // 2. Define Schemas & Models
 
@@ -38,22 +43,23 @@ const LoginEntry = mongoose.model('LoginEntry', loginSchema);
 
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.static('public')); 
+app.use(express.static('public')); // Serve static files like CSS/Images
 app.set('view engine', 'ejs');
 
 // --- ROUTES ---
 
-// ROOT: Login Page
+// ROOT: Render Login Page First (Entry Point)
 app.get('/', (req, res) => {
     res.render('login');
 });
 
-// LOGOUT
+// LOGOUT: Redirect to Login Page
 app.get('/logout', (req, res) => {
+    // In a stateless app, we just redirect to login
     res.redirect('/');
 });
 
-// LOGIN POST
+// LOGIN POST: Save login attempt and redirect to Home
 app.post('/login', async (req, res) => {
     try {
         const newLogin = new LoginEntry({
@@ -61,12 +67,14 @@ app.post('/login', async (req, res) => {
             phone: req.body.phone
         });
         await newLogin.save();
+        console.log(`Login attempt saved for: ${req.body.email}`);
         
-        // Check if user is already registered
+        // Check if this user is already registered to toggle the button state in home
         const existingUser = await User.findOne({ 
             $or: [{ email: req.body.email }, { phone: req.body.phone }] 
         });
 
+        // Pass 'registered' flag to home via query parameter
         const isRegistered = !!existingUser;
         res.redirect(`/home?registered=${isRegistered}`); 
 
@@ -76,18 +84,19 @@ app.post('/login', async (req, res) => {
     }
 });
 
-// HOME
+// HOME: Render Home Page (Dashboard)
 app.get('/home', (req, res) => {
+    // Check for query parameter 'registered' to determine button state
     const isRegistered = req.query.registered === 'true';
     res.render('home', { registered: isRegistered });
 });
 
-// REGISTER GET
+// REGISTER GET: Render Registration Form
 app.get('/register', (req, res) => {
     res.render('register');
 });
 
-// REGISTER POST
+// REGISTER POST: Save User and Render SUCCESS Page
 app.post('/register', async (req, res) => {
     try {
         console.log("Received registration request for:", req.body.name);
@@ -134,7 +143,8 @@ app.post('/register', async (req, res) => {
             console.log(`User Updated: ${user.name} (${user.event_id})`);
         }
 
-        // Always Render Success Page
+        // ALWAYS Render Success Page
+        // Passing 'name' variable to be used in success.ejs
         res.render('success', { name: user.name }); 
 
     } catch (err) {
@@ -143,12 +153,13 @@ app.post('/register', async (req, res) => {
     }
 });
 
-// CONFIRMATION GET
+// CONFIRMATION GET: Display details of the registered user
 app.get('/confirmation', async (req, res) => {
     try {
-        // Ideally use session/ID, but creating simplistic logic as requested:
-        // Get the most recently registered/updated user
-        const latestUser = await User.findOne().sort({ registeredAt: -1 }); 
+        // Logic to get the correct user. 
+        // For this demo, we get the last registered/updated user.
+        // In a production app with sessions, use req.session.userId
+        const latestUser = await User.findOne().sort({ registeredAt: -1 }); // Get the last registered user
         
         if (latestUser) {
             res.render('confirmation', { user: latestUser });
@@ -162,7 +173,7 @@ app.get('/confirmation', async (req, res) => {
 });
 
 // Start Server
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });
