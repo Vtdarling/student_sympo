@@ -26,12 +26,26 @@
             </button>
             <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
                 <ul class="navbar-nav align-items-center">
-                    <!-- Standard Links: No target="_blank" here -->
                     <li class="nav-item"><a class="nav-link" href="#hero">Home</a></li>
                     <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
                     <li class="nav-item"><a class="nav-link" href="#events">Events</a></li>
+                    
+                    <!-- Logout Button -->
+                    <li class="nav-item ms-lg-3">
+                        <a href="/logout" class="btn btn-sm btn-outline-danger px-3 rounded-pill fw-bold">
+                            <i class="fas fa-sign-out-alt me-1"></i> Logout
+                        </a>
+                    </li>
+
+                    <!-- Dynamic Register/Confirmation Button -->
                     <li class="nav-item">
-                        <a class="btn btn-glow ms-lg-3" href="/register">Register Now</a>
+                        <% if (typeof registered !== 'undefined' && registered) { %>
+                            <a class="btn btn-success ms-lg-3 fw-bold" href="/confirmation">
+                                <i class="fas fa-check-circle me-2"></i>Confirmation
+                            </a>
+                        <% } else { %>
+                            <a class="btn btn-glow ms-lg-3" href="/register">Register Now</a>
+                        <% } %>
                     </li>
                 </ul>
             </div>
@@ -48,8 +62,15 @@
                     <p class="lead mb-5 text-white-50">Join the ultimate convergence of code, creativity, and innovation. Prove your skills and win exciting prizes.</p>
                     <div class="d-flex justify-content-center gap-3">
                         <a href="#about" class="btn btn-outline-light rounded-pill px-4 py-2">Learn More</a>
-                        <!-- Clicking this opens /register in the SAME tab -->
-                        <a href="/register" class="btn btn-glow">Register Now</a>
+                        
+                        <!-- Dynamic Button Logic for Hero Section -->
+                        <% if (typeof registered !== 'undefined' && registered) { %>
+                            <a href="/confirmation" class="btn btn-success btn-lg">
+                                <i class="fas fa-check-circle me-2"></i>View Confirmation
+                            </a>
+                        <% } else { %>
+                            <a href="/register" class="btn btn-glow">Register Now</a>
+                        <% } %>
                     </div>
                 </div>
             </div>
@@ -167,7 +188,14 @@
 
             <!-- CTA -->
             <div class="text-center mt-5" data-aos="zoom-in">
-                <a href="/register" class="btn btn-glow px-5 py-3 fs-5">Join The Event</a>
+                <!-- Dynamic Button Logic for Bottom CTA -->
+                <% if (typeof registered !== 'undefined' && registered) { %>
+                    <a href="/confirmation" class="btn btn-success px-5 py-3 fs-5">
+                        <i class="fas fa-check-circle me-2"></i>View Confirmation
+                    </a>
+                <% } else { %>
+                    <a href="/register" class="btn btn-glow px-5 py-3 fs-5">Join The Event</a>
+                <% } %>
             </div>
         </div>
     </section>

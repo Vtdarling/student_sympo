@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registration Successful | TechSymposium '25</title>
-    <!-- Bootstrap 5 -->
+    <title>Registration Successful | TechSymposium '26</title>
+    <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -12,138 +12,70 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <!-- Custom CSS -->
     <link rel="stylesheet" href="/css/style.css">
-    
     <style>
-        body {
-            background: linear-gradient(45deg, #0f0c29, #302b63, #24243e);
-            height: 100vh;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .success-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 3rem;
-            text-align: center;
-            max-width: 500px;
-            width: 90%;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
-            position: relative;
-            z-index: 10;
-        }
-
-        .checkmark-circle {
-            width: 100px;
-            height: 100px;
-            background: linear-gradient(135deg, #00b09b, #96c93d);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 20px;
-            box-shadow: 0 10px 20px rgba(0, 176, 155, 0.4);
-            animation: pulse-green 2s infinite;
-        }
-
-        .checkmark {
-            font-size: 50px;
-            color: white;
-        }
-
-        .btn-home {
-            background: rgba(255,255,255,0.1);
-            color: white;
-            border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 50px;
-            padding: 12px 35px;
-            transition: all 0.3s;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-size: 0.9rem;
-        }
-        .btn-home:hover {
-            background: white;
-            color: #302b63;
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(255,255,255,0.3);
-        }
-
-        @keyframes pulse-green {
-            0% { box-shadow: 0 0 0 0 rgba(0, 176, 155, 0.7); }
-            70% { box-shadow: 0 0 0 20px rgba(0, 176, 155, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(0, 176, 155, 0); }
-        }
+        body { background: #0f0c29; background: linear-gradient(to right, #24243e, #302b63, #0f0c29); min-height: 100vh; display: flex; align-items: center; justify-content: center; font-family: 'Segoe UI', sans-serif; overflow: hidden; margin: 0; }
+        .confetti { position: absolute; width: 12px; height: 12px; background-color: #f00; animation: confetti-fall 4s linear infinite; top: -10vh; z-index: 1; }
+        @keyframes confetti-fall { 0% { transform: translateY(0) rotate(0deg) scale(1); opacity: 1; } 100% { transform: translateY(110vh) rotate(720deg) scale(0.5); opacity: 0; } }
+        .success-card { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); max-width: 480px; width: 90%; text-align: center; position: relative; z-index: 10; overflow: hidden; transition: transform 0.3s ease; }
+        .success-card:hover { transform: translateY(-5px); }
+        .success-card::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent); transition: 0.5s; pointer-events: none; }
+        .success-card:hover::before { left: 100%; }
+        .check-icon-circle { width: 110px; height: 110px; background: linear-gradient(135deg, rgba(40, 167, 69, 0.2), rgba(40, 167, 69, 0.05)); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 25px; border: 2px solid #28a745; box-shadow: 0 0 30px rgba(40, 167, 69, 0.3); animation: pulse-green 2s infinite; }
+        @keyframes pulse-green { 0% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.4); } 70% { box-shadow: 0 0 0 15px rgba(40, 167, 69, 0); } }
+        .btn-home { background: linear-gradient(45deg, #00c6ff, #0072ff); border: none; color: white; padding: 14px 40px; border-radius: 50px; text-transform: uppercase; font-weight: 800; letter-spacing: 1.5px; transition: all 0.4s ease; box-shadow: 0 5px 15px rgba(0, 198, 255, 0.4); display: inline-block; text-decoration: none; position: relative; overflow: hidden; }
+        .btn-home::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(rgba(255,255,255,0.2), transparent); opacity: 0; transition: opacity 0.3s; }
+        .btn-home:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 10px 30px rgba(0, 198, 255, 0.6); color: white; opacity: 1; }
+        h2.success-title { background: linear-gradient(to right, #fff, #a5b4fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 2.5rem; }
     </style>
 </head>
 <body>
-
-    <!-- Confetti Canvas -->
-    <canvas id="confetti-canvas" style="position: absolute; top:0; left:0; width:100%; height:100%; pointer-events: none; z-index: 5;"></canvas>
-
-    <!-- Moving Background Shapes (Reused from Register) -->
-    <div class="circles">
-        <div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div>
-    </div>
-
-    <div class="success-card animate__animated animate__zoomIn">
-        
-        <div class="checkmark-circle animate__animated animate__bounceIn animate__delay-1s">
-            <i class="fas fa-check checkmark"></i>
-        </div>
-
-        <h2 class="fw-bold text-white mb-2 animate__animated animate__fadeInUp animate__delay-1s">Registration Confirmed!</h2>
-        
-        <p class="text-white-50 mb-4 animate__animated animate__fadeInUp animate__delay-2s">
-            Thank you, <strong class="text-white"><%= name %></strong>. <br>
-            Your seat has been reserved. Get ready to innovate!
-        </p>
-
-        <div class="animate__animated animate__fadeInUp animate__delay-3s">
-            <a href="/" class="btn btn-home fw-bold text-decoration-none">
-                <i class="fas fa-arrow-left me-2"></i> Back to Home
-            </a>
-        </div>
-        
-    </div>
-
-    <!-- Confetti Script -->
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <script>
-        // Trigger Confetti
-        var duration = 3 * 1000;
-        var animationEnd = Date.now() + duration;
-        var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
-
-        function randomInRange(min, max) {
-            return Math.random() * (max - min) + min;
-        }
-
-        var interval = setInterval(function() {
-            var timeLeft = animationEnd - Date.now();
-
-            if (timeLeft <= 0) {
-                return clearInterval(interval);
-            }
-
-            var particleCount = 50 * (timeLeft / duration);
+    <div id="confetti-container"></div>
+    <div class="container d-flex justify-content-center">
+        <div class="success-card p-5 animate__animated animate__backInDown">
             
-            // multiple origins to fill screen
-            confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
-            confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
-        }, 250);
-        
-        // One big burst at start
-        confetti({
-            particleCount: 100,
-            spread: 70,
-            origin: { y: 0.6 }
-        });
-    </script>
+            <div class="check-icon-circle animate__animated animate__bounceIn animate__delay-1s">
+                <i class="fas fa-check fa-4x text-success"></i>
+            </div>
 
+            <h2 class="fw-bold mb-3 animate__animated animate__fadeInUp animate__delay-1s success-title">Success!</h2>
+            
+            <p class="text-white-50 mb-5 fs-5 animate__animated animate__fadeInUp animate__delay-1s">
+                Thank you, <span class="text-white fw-bold"><%= name %></span>!<br>
+                Your registration has been confirmed.
+            </p>
+
+            <div class="animate__animated animate__fadeInUp animate__delay-2s">
+                <!-- IMPORTANT CHANGE: Added query param registered=true -->
+                <a href="/home?registered=true" class="btn btn-home">
+                    <i class="fas fa-home me-2"></i> Return to Home
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Enhanced Confetti Script
+        function createConfetti() {
+            const container = document.getElementById('confetti-container');
+            const colors = ['#00c6ff', '#0072ff', '#ff0057', '#e4ff00', '#00ff73', '#ff00cc'];
+            
+            for(let i=0; i<80; i++) {
+                const div = document.createElement('div');
+                div.classList.add('confetti');
+                div.style.left = Math.random() * 100 + 'vw';
+                div.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                const size = Math.random() * 8 + 6 + 'px'; div.style.width = size; div.style.height = size;
+                div.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                div.style.animationDelay = (Math.random() * 5) + 's';
+                if(Math.random() > 0.5) { div.style.borderRadius = '50%'; }
+                container.appendChild(div);
+            }
+        }
+        createConfetti();
+    </script>
 </body>
 </html>
