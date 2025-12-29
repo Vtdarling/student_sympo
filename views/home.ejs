@@ -55,7 +55,9 @@
                     <h5 class="text-uppercase text-info letter-spacing-1 mb-3">Department of IT Presents</h5>
                     <h1 class="glitch-text mb-4">SYMPOSIUM 2026</h1>
                     <p class="lead mb-5 text-white-50">Join the ultimate convergence of code, creativity, and innovation.</p>
-                    <div class="d-flex justify-content-center gap-3">
+                    
+                    <!-- Modified Container for Buttons: Stacks on mobile (reverse order), Row on desktop -->
+                    <div class="d-flex flex-column-reverse flex-sm-row justify-content-center align-items-center gap-3">
                         <a href="#about" class="btn btn-outline-light rounded-pill px-4 py-2">Learn More</a>
                         
                         <% if (typeof registered !== 'undefined' && registered) { %>
@@ -66,6 +68,7 @@
                             <a id="hero-cta-btn" href="/register" class="btn btn-glow">Register Now</a>
                         <% } %>
                     </div>
+
                 </div>
             </div>
         </div>
