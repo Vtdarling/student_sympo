@@ -4,13 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TechSymposium '26 | Home</title>
-    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Animation Library (AOS) -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    <!-- Custom CSS -->
     <link rel="stylesheet" href="/css/style.css">
-    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body style="background-color: #0f0c29; color: white;">
@@ -30,21 +26,20 @@
                     <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
                     <li class="nav-item"><a class="nav-link" href="#events">Events</a></li>
                     
-                    <!-- Logout Button -->
                     <li class="nav-item ms-lg-3">
-                        <a href="/logout" class="btn btn-sm btn-outline-danger px-3 rounded-pill fw-bold">
+                        <a href="/logout" onclick="logout()" class="btn btn-sm btn-outline-danger px-3 rounded-pill fw-bold">
                             <i class="fas fa-sign-out-alt me-1"></i> Logout
                         </a>
                     </li>
 
-                    <!-- Dynamic Register/Confirmation Button -->
                     <li class="nav-item">
+                        <!-- ID: nav-cta-btn -->
                         <% if (typeof registered !== 'undefined' && registered) { %>
-                            <a class="btn btn-success ms-lg-3 fw-bold" href="/confirmation">
-                                <i class="fas fa-check-circle me-2"></i>Confirmation
-                            </a>
+                             <button id="nav-cta-btn" class="btn btn-success ms-lg-3 fw-bold" onclick="viewTicket('<%= typeof event_id !== 'undefined' ? event_id : '' %>')">
+                                <i class="fas fa-check-circle me-2"></i>Ticket
+                            </button>
                         <% } else { %>
-                            <a class="btn btn-glow ms-lg-3" href="/register">Register Now</a>
+                            <a id="nav-cta-btn" class="btn btn-glow ms-lg-3" href="/register">Register</a>
                         <% } %>
                     </li>
                 </ul>
@@ -59,17 +54,17 @@
                 <div class="col-lg-8">
                     <h5 class="text-uppercase text-info letter-spacing-1 mb-3">Department of IT Presents</h5>
                     <h1 class="glitch-text mb-4">SYMPOSIUM 2026</h1>
-                    <p class="lead mb-5 text-white-50">Join the ultimate convergence of code, creativity, and innovation. Prove your skills and win exciting prizes.</p>
+                    <p class="lead mb-5 text-white-50">Join the ultimate convergence of code, creativity, and innovation.</p>
                     <div class="d-flex justify-content-center gap-3">
                         <a href="#about" class="btn btn-outline-light rounded-pill px-4 py-2">Learn More</a>
                         
-                        <!-- Dynamic Button Logic for Hero Section -->
+                        <!-- ID: hero-cta-btn -->
                         <% if (typeof registered !== 'undefined' && registered) { %>
-                            <a href="/confirmation" class="btn btn-success btn-lg">
-                                <i class="fas fa-check-circle me-2"></i>View Confirmation
-                            </a>
+                            <button id="hero-cta-btn" onclick="viewTicket('<%= typeof event_id !== 'undefined' ? event_id : '' %>')" class="btn btn-success btn-lg">
+                                <i class="fas fa-check-circle me-2"></i>View Ticket
+                            </button>
                         <% } else { %>
-                            <a href="/register" class="btn btn-glow">Register Now</a>
+                            <a id="hero-cta-btn" href="/register" class="btn btn-glow">Register Now</a>
                         <% } %>
                     </div>
                 </div>
@@ -188,13 +183,13 @@
 
             <!-- CTA -->
             <div class="text-center mt-5" data-aos="zoom-in">
-                <!-- Dynamic Button Logic for Bottom CTA -->
+                <!-- ID: bottom-cta-btn -->
                 <% if (typeof registered !== 'undefined' && registered) { %>
-                    <a href="/confirmation" class="btn btn-success px-5 py-3 fs-5">
-                        <i class="fas fa-check-circle me-2"></i>View Confirmation
-                    </a>
+                     <button id="bottom-cta-btn" onclick="viewTicket('<%= typeof event_id !== 'undefined' ? event_id : '' %>')" class="btn btn-success px-5 py-3 fs-5">
+                        <i class="fas fa-check-circle me-2"></i>View Ticket
+                    </button>
                 <% } else { %>
-                    <a href="/register" class="btn btn-glow px-5 py-3 fs-5">Join The Event</a>
+                    <a id="bottom-cta-btn" href="/register" class="btn btn-glow px-5 py-3 fs-5">Join The Event</a>
                 <% } %>
             </div>
         </div>
@@ -209,5 +204,78 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script> AOS.init(); </script>
+
+    <!-- ROBUST TICKET REDIRECT SCRIPT -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // 1. Capture ID from URL if present (Server priority)
+            const urlParams = new URLSearchParams(window.location.search);
+            const serverEventId = urlParams.get('event_id');
+            const registered = urlParams.get('registered');
+
+            // 2. Save to Memory if valid
+            if (serverEventId && registered === 'true') {
+                localStorage.setItem('sympo_event_id', serverEventId);
+            }
+
+            // 3. Update buttons based on Memory (Client priority)
+            const storedEventId = localStorage.getItem('sympo_event_id');
+            if (storedEventId) {
+                updateButtonsToTicketMode(storedEventId);
+            }
+        });
+
+        // The Smart Navigation Function
+        function viewTicket(fallbackId) {
+            // Priority 1: Check Local Storage
+            let targetId = localStorage.getItem('sympo_event_id');
+
+            // Priority 2: Check what the button has (EJS variable)
+            if (!targetId && fallbackId && fallbackId.length > 0) {
+                targetId = fallbackId;
+                // Save it for next time
+                localStorage.setItem('sympo_event_id', targetId);
+            }
+
+            // Priority 3: Check URL params
+            if (!targetId) {
+                const urlParams = new URLSearchParams(window.location.search);
+                targetId = urlParams.get('event_id');
+            }
+
+            if (targetId) {
+                // Success: Go to ticket
+                window.location.href = `/confirmation?event_id=${targetId}`;
+            } else {
+                // Failure: No ID found anywhere -> Go to login
+                alert("Session expired. Please login again.");
+                window.location.href = "/";
+            }
+        }
+
+        function updateButtonsToTicketMode(eventId) {
+            const btnClass = "btn btn-success fw-bold";
+            const btnHtml = '<i class="fas fa-check-circle me-2"></i>View Ticket';
+
+            const updateBtn = (id, addClass = "") => {
+                const btn = document.getElementById(id);
+                if (btn) {
+                    // Convert <a> to look and act like the smart button
+                    btn.removeAttribute("href"); 
+                    btn.className = `${btnClass} ${addClass}`;
+                    btn.innerHTML = btnHtml;
+                    btn.onclick = function() { viewTicket(eventId); };
+                }
+            };
+
+            updateBtn("nav-cta-btn", "ms-lg-3");
+            updateBtn("hero-cta-btn", "btn-lg");
+            updateBtn("bottom-cta-btn", "px-5 py-3 fs-5");
+        }
+
+        function logout() {
+            localStorage.removeItem('sympo_event_id');
+        }
+    </script>
 </body>
 </html>

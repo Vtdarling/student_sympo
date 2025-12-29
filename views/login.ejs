@@ -8,197 +8,92 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <link rel="stylesheet" href="/css/style.css">
-    
     <style>
-        body {
-            margin: 0;
-            padding: 0;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #000; /* Fallback */
-        }
-
-        /* Video Background Container */
-        .video-bg {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            z-index: -1;
-        }
-
-        .video-bg video {
-            min-width: 100%;
-            min-height: 100%;
-            width: auto;
-            height: auto;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            object-fit: cover;
-        }
-
-        /* Dark Overlay for readability - Reduced opacity for clarity */
-        .video-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.4); /* Light overlay to see video clearly */
-            z-index: 0;
-        }
-
-        .login-card {
-            background: rgba(16, 16, 16, 0.6); /* Transparent card background */
-            /* Removed backdrop-filter to ensure video is clear */
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-top: 1px solid rgba(255, 255, 255, 0.3);
-            border-left: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 20px;
-            box-shadow: 0 25px 45px rgba(0,0,0,0.3);
-            width: 100%;
-            max-width: 420px;
-            z-index: 2;
-            transition: all 0.5s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .login-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 35px 55px rgba(0,0,0,0.4);
-            border-color: rgba(255, 255, 255, 0.4);
-        }
-
-        .glass-input {
-            background: rgba(255, 255, 255, 0.1) !important;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: white !important;
-            transition: all 0.3s ease;
-            border-radius: 10px;
-        }
-        
-        .glass-input:focus {
-            background: rgba(255, 255, 255, 0.15) !important;
-            border-color: #00c6ff;
-            box-shadow: 0 0 20px rgba(0, 198, 255, 0.4);
-        }
-
+        body { margin: 0; padding: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #000; }
+        .video-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; z-index: -1; }
+        .video-bg video { min-width: 100%; min-height: 100%; width: auto; height: auto; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); object-fit: cover; }
+        .video-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); z-index: 0; }
+        .login-card { background: rgba(16, 16, 16, 0.6); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 20px; box-shadow: 0 25px 45px rgba(0,0,0,0.3); width: 100%; max-width: 420px; z-index: 2; position: relative; overflow: hidden; }
+        .glass-input { background: rgba(255, 255, 255, 0.1) !important; border: 1px solid rgba(255, 255, 255, 0.2); color: white !important; transition: all 0.3s ease; border-radius: 10px; }
+        input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus, input:-webkit-autofill:active{ -webkit-box-shadow: 0 0 0 30px rgba(0, 0, 0, 0.5) inset !important; -webkit-text-fill-color: white !important; transition: background-color 5000s ease-in-out 0s; }
+        .glass-input:focus { background: rgba(255, 255, 255, 0.15) !important; border-color: #00c6ff; box-shadow: 0 0 20px rgba(0, 198, 255, 0.4); outline: none; }
         .glass-input::placeholder { color: rgba(255, 255, 255, 0.6); }
-        
-        .form-floating label { color: rgba(255, 255, 255, 0.7); }
-        
-        .btn-glow {
-            background: linear-gradient(45deg, #00c6ff, #0072ff);
-            border: none;
-            color: white;
-            padding: 12px;
-            text-transform: uppercase;
-            font-weight: 700;
-            letter-spacing: 2px;
-            box-shadow: 0 5px 15px rgba(0, 198, 255, 0.4);
-            transition: all 0.4s ease;
-        }
-        
-        .btn-glow:hover {
-            box-shadow: 0 8px 25px rgba(0, 198, 255, 0.7), 0 0 15px #00c6ff;
-            transform: scale(1.05);
-            color: white;
-        }
-
-        .icon-circle {
-            width: 90px;
-            height: 90px;
-            background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0));
-            border-radius: 50%;
-            border: 1px solid rgba(255,255,255,0.25);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 20px;
-            animation: floating 3s ease-in-out infinite;
-        }
-
-        @keyframes floating {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-            100% { transform: translateY(0px); }
-        }
-
-        .funky-icon {
-            filter: drop-shadow(0 0 5px rgba(0, 198, 255, 0.5));
-            animation: pulse-glow 2s infinite;
-        }
-
-        @keyframes pulse-glow {
-            0% { filter: drop-shadow(0 0 5px rgba(0, 198, 255, 0.5)); transform: scale(1); }
-            50% { filter: drop-shadow(0 0 20px rgba(0, 198, 255, 0.9)); transform: scale(1.15); }
-            100% { filter: drop-shadow(0 0 5px rgba(0, 198, 255, 0.5)); transform: scale(1); }
-        }
-        
-        .title-text { text-shadow: 0 2px 4px rgba(0,0,0,0.5); letter-spacing: 1px; }
-
+        .form-floating label { color: rgba(255, 255, 255, 0.9) !important; background-color: transparent !important; z-index: 10; transition: all 0.3s ease; }
+        .form-floating > .form-control:focus ~ label, .form-floating > .form-control:not(:placeholder-shown) ~ label, .form-floating > .form-control:-webkit-autofill ~ label { color: #00c6ff !important; opacity: 1; transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem); text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+        .btn-glow { background: linear-gradient(45deg, #00c6ff, #0072ff); border: none; color: white; padding: 12px; text-transform: uppercase; font-weight: 700; letter-spacing: 2px; box-shadow: 0 5px 15px rgba(0, 198, 255, 0.4); transition: all 0.4s ease; }
+        .btn-glow:hover { box-shadow: 0 8px 25px rgba(0, 198, 255, 0.7), 0 0 15px #00c6ff; transform: scale(1.05); color: white; }
+        .icon-circle { width: 90px; height: 90px; background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0)); border-radius: 50%; border: 1px solid rgba(255,255,255,0.25); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; animation: floating 3s ease-in-out infinite; }
+        @keyframes floating { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
+        #server-error-msg { background-color: rgba(220, 53, 69, 0.2); border: 1px solid #dc3545; color: #ffcccc; font-size: 0.9em; text-align: center; padding: 10px; border-radius: 8px; margin-bottom: 20px; animation: shake 0.5s; }
+        #client-error-msg { background-color: rgba(220, 53, 69, 0.2); border: 1px solid #dc3545; color: #ffcccc; font-size: 0.9em; text-align: center; padding: 10px; border-radius: 8px; margin-bottom: 20px; display: none; }
+        @keyframes shake { 0% { transform: translateX(0); } 25% { transform: translateX(-5px); } 50% { transform: translateX(5px); } 75% { transform: translateX(-5px); } 100% { transform: translateX(0); } }
     </style>
 </head>
 <body>
-
-    <!-- Video Background -->
     <div class="video-bg">
-        <video playsinline="playsinline" autoplay="autoplay" muted="muted" loop="loop">
-            <!-- High Quality Tech Video -->
+        <video autoplay muted loop playsinline poster="/images/bg-fallback.jpg">
             <source src="/images/login_bg.mp4" type="video/mp4">
         </video>
         <div class="video-overlay"></div>
     </div>
-
-    <!-- Login Container -->
-    <div class="container d-flex justify-content-center align-items-center">
-        
-      <div class="container d-flex justify-content-center align-items-center">
-        
+    <div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
         <div class="login-card p-4 p-md-5 animate__animated animate__zoomIn">
-            
             <div class="text-center mb-4">
                 <div class="icon-circle animate__animated animate__fadeInDown animate__delay-1s">
                     <i class="fas fa-user-astronaut fa-3x text-info"></i>
                 </div>
-                <h2 class="fw-bold text-white mb-1 animate__animated animate__fadeInUp animate__delay-1s">participants login</h2>
+                <h2 class="fw-bold text-white mb-1 animate__animated animate__fadeInUp animate__delay-1s">Participants Login</h2>
                 <p class="text-white-50 small animate__animated animate__fadeInUp animate__delay-1s">Enter your credentials to access the portal</p>
             </div>
-
-            <form action="/login" method="POST">
-                
+            <% if (locals.error && error !== null) { %>
+                <div id="server-error-msg">
+                    <i class="fas fa-exclamation-triangle me-2"></i> <%= error %>
+                </div>
+            <% } %>
+            <div id="client-error-msg"></div>
+            <form action="/login" method="POST" onsubmit="return validateForm()">
                 <div class="form-floating mb-3 animate__animated animate__fadeInLeft animate__delay-1s">
                     <input type="email" name="email" class="form-control glass-input" id="floatingEmail" placeholder="name@example.com" required>
                     <label for="floatingEmail"><i class="fas fa-envelope me-2"></i>Email Address</label>
                 </div>
-
                 <div class="form-floating mb-4 animate__animated animate__fadeInRight animate__delay-1s">
-                    <input type="tel" name="phone" class="form-control glass-input" id="floatingPhone" placeholder="Phone" pattern="[0-9]{10}" required>
+                    <input type="tel" name="phone" class="form-control glass-input" id="floatingPhone" placeholder="Phone" maxlength="10" required>
                     <label for="floatingPhone"><i class="fas fa-phone me-2"></i>Phone Number</label>
                 </div>
-
                 <div class="d-grid animate__animated animate__fadeInUp animate__delay-2s">
                     <button type="submit" class="btn btn-glow rounded-pill btn-lg">
                         Get In <i class="fas fa-arrow-right ms-2"></i>
                     </button>
                 </div>
-
             </form>
-
         </div>
     </div>
-
-    <!-- Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // CLEANUP: Ensure previous session is cleared on login page
+        window.onload = function() {
+            localStorage.removeItem('sympo_event_id');
+            console.log("Session cleared.");
+        };
 
+        function validateForm() {
+            const emailInput = document.getElementById('floatingEmail').value;
+            const phoneInput = document.getElementById('floatingPhone').value;
+            const errorMsg = document.getElementById('client-error-msg');
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            const phoneRegex = /^\d{10}$/;
+            if (!emailRegex.test(emailInput)) { showError("❌ Please enter a valid email address."); return false; }
+            if (!phoneRegex.test(phoneInput)) { showError("❌ Phone number must be exactly 10 digits."); return false; }
+            errorMsg.style.display = "none";
+            return true; 
+        }
+        function showError(message) {
+            const errorMsg = document.getElementById('client-error-msg');
+            errorMsg.innerText = message;
+            errorMsg.style.display = "block";
+            errorMsg.classList.add('animate-shake');
+            setTimeout(() => errorMsg.classList.remove('animate-shake'), 500);
+        }
+    </script>
 </body>
 </html>

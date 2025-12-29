@@ -35,6 +35,8 @@
             box-shadow: 0 15px 35px rgba(0,0,0,0.5);
             max-width: 650px;
             width: 100%;
+            position: relative;
+            overflow: hidden;
         }
 
         .event-id-badge {
@@ -48,6 +50,7 @@
             margin-bottom: 20px;
             box-shadow: 0 5px 15px rgba(221, 36, 118, 0.4);
             letter-spacing: 2px;
+            text-transform: uppercase;
         }
 
         .detail-row {
@@ -78,7 +81,13 @@
             color: white;
             font-size: 1.2rem;
             flex-shrink: 0;
+            box-shadow: 0 0 10px rgba(0, 198, 255, 0.3);
         }
+
+        /* Specific colors for event types */
+        .icon-tech { background: linear-gradient(45deg, #11998e, #38ef7d); }
+        .icon-nontech { background: linear-gradient(45deg, #f2994a, #f2c94c); }
+        .icon-money { background: linear-gradient(45deg, #56ab2f, #a8e063); }
 
         .btn-home {
             background: transparent;
@@ -90,14 +99,17 @@
             font-weight: bold;
             text-transform: uppercase;
             letter-spacing: 1px;
+            text-decoration: none;
+            display: inline-block;
         }
 
         .btn-home:hover {
             background: #00c6ff;
             color: white;
             box-shadow: 0 0 20px rgba(0, 198, 255, 0.5);
+            transform: translateY(-2px);
         }
-        
+
         .header-section {
             border-bottom: 1px solid rgba(255,255,255,0.1);
             padding-bottom: 20px;
@@ -113,14 +125,14 @@
             
             <!-- Event ID Display -->
             <div class="mb-3 animate__animated animate__fadeInDown">
-                <span class="text-white-50 small d-block mb-2">YOUR UNIQUE ID</span>
+                <span class="text-white-50 small d-block mb-2">YOUR PARTICIPANT ID</span>
                 <div class="event-id-badge">
-                    <%= user.event_id || 'PENDING' %>
+                    <%= "SYM" + (user.event_id || '00') %>
                 </div>
             </div>
 
             <h2 class="fw-bold mb-1">Registration Details</h2>
-            <p class="text-white-50">Here is your registration summary</p>
+            <p class="text-white-50">TechSymposium '26 - Official Entry Pass</p>
         </div>
 
         <div class="details-container animate__animated animate__fadeInUp animate__delay-1s">
@@ -130,7 +142,7 @@
                     <div class="detail-row">
                         <div class="detail-icon"><i class="fas fa-user"></i></div>
                         <div class="text-break">
-                            <small class="text-white-50 d-block text-uppercase" style="font-size: 0.75rem;">Full Name</small>
+                            <small class="text-white-50 d-block text-uppercase" style="font-size: 0.7rem;">Full Name</small>
                             <span class="fw-bold text-white fs-5"><%= user.name %></span>
                         </div>
                     </div>
@@ -139,7 +151,7 @@
                     <div class="detail-row">
                         <div class="detail-icon"><i class="fas fa-phone"></i></div>
                         <div class="text-break">
-                            <small class="text-white-50 d-block text-uppercase" style="font-size: 0.75rem;">Phone Number</small>
+                            <small class="text-white-50 d-block text-uppercase" style="font-size: 0.7rem;">Phone Number</small>
                             <span class="fw-bold text-white fs-5"><%= user.phone %></span>
                         </div>
                     </div>
@@ -149,33 +161,33 @@
             <div class="detail-row">
                 <div class="detail-icon"><i class="fas fa-university"></i></div>
                 <div class="text-break">
-                    <small class="text-white-50 d-block text-uppercase" style="font-size: 0.75rem;">College / Institution</small>
+                    <small class="text-white-50 d-block text-uppercase" style="font-size: 0.7rem;">College / Institution</small>
                     <span class="fw-bold text-white fs-5"><%= user.college %></span>
                 </div>
             </div>
 
-            <div class="detail-row border-primary border-opacity-50">
-                <div class="detail-icon bg-primary"><i class="fas fa-microchip"></i></div>
+            <div class="detail-row" style="border-left: 4px solid #38ef7d;">
+                <div class="detail-icon icon-tech"><i class="fas fa-microchip"></i></div>
                 <div class="text-break">
-                    <small class="text-white-50 d-block text-uppercase" style="font-size: 0.75rem;">Technical Event</small>
-                    <span class="fw-bold text-info fs-5"><%= user.technical_event %></span>
+                    <small class="text-white-50 d-block text-uppercase" style="font-size: 0.7rem;">Technical Event</small>
+                    <span class="fw-bold text-white fs-5"><%= user.technical_event %></span>
                 </div>
             </div>
 
-            <div class="detail-row border-warning border-opacity-50">
-                <div class="detail-icon bg-warning"><i class="fas fa-gamepad"></i></div>
+            <div class="detail-row" style="border-left: 4px solid #f2c94c;">
+                <div class="detail-icon icon-nontech"><i class="fas fa-gamepad"></i></div>
                 <div class="text-break">
-                    <small class="text-white-50 d-block text-uppercase" style="font-size: 0.75rem;">Non-Technical Event</small>
-                    <span class="fw-bold text-warning fs-5"><%= user.non_technical_event %></span>
+                    <small class="text-white-50 d-block text-uppercase" style="font-size: 0.7rem;">Non-Technical Event</small>
+                    <span class="fw-bold text-white fs-5"><%= user.non_technical_event %></span>
                 </div>
             </div>
 
             <% if(user.transaction_id) { %>
-            <div class="detail-row border-success border-opacity-50">
-                <div class="detail-icon bg-success"><i class="fas fa-receipt"></i></div>
+            <div class="detail-row" style="border-left: 4px solid #a8e063;">
+                <div class="detail-icon icon-money"><i class="fas fa-receipt"></i></div>
                 <div class="text-break">
-                    <small class="text-white-50 d-block text-uppercase" style="font-size: 0.75rem;">Transaction ID</small>
-                    <span class="fw-bold text-success fs-5"><%= user.transaction_id %></span>
+                    <small class="text-white-50 d-block text-uppercase" style="font-size: 0.7rem;">Transaction ID</small>
+                    <span class="fw-bold text-white fs-5"><%= user.transaction_id %></span>
                 </div>
             </div>
             <% } %>
@@ -183,11 +195,14 @@
         </div>
 
         <div class="text-center mt-4 animate__animated animate__fadeInUp animate__delay-2s">
-            <a href="/home?registered=true" class="btn btn-home text-decoration-none">
-                <i class="fas fa-arrow-left me-2"></i> Back to Dashboard
+            
+            <!-- Dashboard Link -->
+            <a href="/home?registered=true&event_id=<%= user.event_id %>" class="btn btn-home">
+                <i class="fas fa-arrow-left me-2"></i> Dashboard
             </a>
+            
             <div class="mt-3">
-                <small class="text-white-50">Please take a screenshot of this page for your records.</small>
+                <small class="text-white-50">Please present this screen or a screenshot at the registration desk.</small>
             </div>
         </div>
 

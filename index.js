@@ -6,7 +6,6 @@ const path = require('path');
 const app = express();
 
 // --- DATABASE CONNECTION ---
-// Using MongoDB Atlas Connection String provided by user
 const dbURI = "mongodb+srv://720723110803_db_user:darling%40123@cluster0.ddwhmyt.mongodb.net/symposiumDB?retryWrites=true&w=majority&appName=Cluster0";
 
 mongoose.connect(dbURI)
@@ -15,68 +14,79 @@ mongoose.connect(dbURI)
         console.error('❌ MongoDB Connection Error:', err);
     });
 
-// 2. Define Schemas & Models
-
-// Schema for Registration Data
+// --- SCHEMAS ---
 const userSchema = new mongoose.Schema({
-    event_id: String, // New Field for generated ID
+    event_id: String,
     name: String,
-    email: String,
-    phone: String,
+    email: { type: String, unique: true },
+    phone: { type: String, unique: true },
     college: String,
     technical_event: String,
     non_technical_event: String,
-    transaction_id: String,
-    registeredAt: { type: Date, default: Date.now } // Track registration time
+    transaction_id: { type: String, unique: true },
+    registeredAt: { type: Date, default: Date.now }
 });
 
-// Schema for Login Logs
 const loginSchema = new mongoose.Schema({
     email: { type: String, required: true },
     phone: { type: String, required: true },
     loginTime: { type: Date, default: Date.now }
 });
 
-// 3. Create Models
 const User = mongoose.model('User', userSchema);
 const LoginEntry = mongoose.model('LoginEntry', loginSchema);
 
-// Middleware
+// --- MIDDLEWARE ---
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.static('public')); // Serve static files like CSS/Images
+app.use(express.static('public'));
 app.set('view engine', 'ejs');
+
+// --- HELPER ---
+async function generateNextId() {
+    const count = await User.countDocuments(); 
+    const nextIdNumber = count + 1;
+    return nextIdNumber.toString().padStart(2, '0');
+}
 
 // --- ROUTES ---
 
-// ROOT: Render Login Page First (Entry Point)
+// 1. ROOT: Login
 app.get('/', (req, res) => {
-    res.render('login');
+    // Capture error from query params (e.g., ?error=Please login)
+    const errorMsg = req.query.error || null;
+    res.render('login', { error: errorMsg });
 });
 
-// LOGOUT: Redirect to Login Page
+// 2. LOGOUT
 app.get('/logout', (req, res) => {
-    // In a stateless app, we just redirect to login
     res.redirect('/');
 });
 
-// LOGIN POST: Save login attempt and redirect to Home
+// 3. LOGIN POST
 app.post('/login', async (req, res) => {
     try {
-        const newLogin = new LoginEntry({
-            email: req.body.email,
-            phone: req.body.phone
-        });
+        const { email, phone } = req.body;
+        const newLogin = new LoginEntry({ email, phone });
         await newLogin.save();
-        console.log(`Login attempt saved for: ${req.body.email}`);
         
-        // Check if this user is already registered to toggle the button state in home
-        const existingUser = await User.findOne({ 
-            $or: [{ email: req.body.email }, { phone: req.body.phone }] 
-        });
+        let user = await User.findOne({ email: email, phone: phone });
 
-        // Pass 'registered' flag to home via query parameter
-        const isRegistered = !!existingUser;
-        res.redirect(`/home?registered=${isRegistered}`); 
+        if (user) {
+            // Self-Healing: Generate ID if missing
+            if (!user.event_id) {
+                user.event_id = await generateNextId();
+                await user.save();
+            }
+            // SUCCESS: Redirect with ID
+            return res.redirect(`/home?registered=true&event_id=${user.event_id}`);
+        }
+
+        const partial = await User.findOne({ $or: [{ email }, { phone }] });
+        if (partial) {
+            return res.render('login', { error: "Invalid Email and Phone combination." });
+        }
+
+        res.redirect(`/home?registered=false`);
 
     } catch (err) {
         console.error(err);
@@ -84,95 +94,68 @@ app.post('/login', async (req, res) => {
     }
 });
 
-// HOME: Render Home Page (Dashboard)
+// 4. HOME DASHBOARD
 app.get('/home', (req, res) => {
-    // Check for query parameter 'registered' to determine button state
     const isRegistered = req.query.registered === 'true';
-    res.render('home', { registered: isRegistered });
+    const eventId = req.query.event_id || '';
+    
+    res.render('home', { registered: isRegistered, event_id: eventId });
 });
 
-// REGISTER GET: Render Registration Form
+// 5. REGISTER GET
 app.get('/register', (req, res) => {
-    res.render('register');
+    res.render('register', { error: null });
 });
 
-// REGISTER POST: Save User and Render SUCCESS Page
+// 6. REGISTER POST
 app.post('/register', async (req, res) => {
     try {
-        console.log("Received registration request for:", req.body.name);
+        const { name, email, phone, college, technical_event, non_technical_event, transaction_id } = req.body;
 
-        const filter = { 
-            $or: [{ email: req.body.email }, { phone: req.body.phone }] 
-        };
+        if (await User.findOne({ email })) return res.render('register', { error: `Email '${email}' already registered.` });
+        if (await User.findOne({ phone })) return res.render('register', { error: `Phone '${phone}' already registered.` });
+        if (await User.findOne({ transaction_id })) return res.render('register', { error: `Transaction ID '${transaction_id}' already used!` });
 
-        // Check if user exists first to avoid generating new ID for updates
-        let user = await User.findOne(filter);
+        const eventId = await generateNextId();
 
-        if (!user) {
-            // GENERATE NEW EVENT ID (First Come First Serve)
-            const count = await User.countDocuments(); // Count existing users
-            const nextIdNumber = count + 1;
-            // Pad with leading zero if less than 10 (e.g., 01, 02, ... 10, 11)
-            const eventId = `Sympo${nextIdNumber.toString().padStart(2, '0')}`;
-            
-            console.log(`Generating new Event ID: ${eventId}`);
+        const user = new User({
+            event_id: eventId,
+            name, email, phone, college,
+            technical_event, non_technical_event, transaction_id
+        });
 
-            // Create new user object
-            user = new User({
-                event_id: eventId,
-                name: req.body.name,
-                email: req.body.email,
-                phone: req.body.phone,
-                college: req.body.college,
-                technical_event: req.body.technical_event,
-                non_technical_event: req.body.non_technical_event,
-                transaction_id: req.body.transaction_id
-            });
-
-            await user.save();
-            console.log(`New User Registered: ${user.name} (${user.event_id})`);
-        } else {
-            // If user exists, update details but KEEP original event_id
-            user.name = req.body.name;
-            user.college = req.body.college;
-            user.technical_event = req.body.technical_event;
-            user.non_technical_event = req.body.non_technical_event;
-            user.transaction_id = req.body.transaction_id;
-            
-            await user.save();
-            console.log(`User Updated: ${user.name} (${user.event_id})`);
-        }
-
-        // ALWAYS Render Success Page
-        // Passing 'name' variable to be used in success.ejs
-        res.render('success', { name: user.name }); 
+        await user.save();
+        res.render('success', { name: user.name, event_id: user.event_id });
 
     } catch (err) {
         console.error("Registration Error:", err);
-        res.status(500).send("Error registering user: " + err.message);
+        res.render('register', { error: "System error. Please try again later." });
     }
 });
 
-// CONFIRMATION GET: Display details of the registered user
+// 7. CONFIRMATION GET (FIXED)
 app.get('/confirmation', async (req, res) => {
     try {
-        // Logic to get the correct user. 
-        // For this demo, we get the last registered/updated user.
-        // In a production app with sessions, use req.session.userId
-        const latestUser = await User.findOne().sort({ registeredAt: -1 }); // Get the last registered user
+        const eventId = req.query.event_id; 
+
+        // FIX: Redirect to login instead of showing raw text error
+        if (!eventId) {
+            return res.redirect('/?error=Session expired. Please login to view ticket.');
+        }
+
+        const user = await User.findOne({ event_id: eventId });
         
-        if (latestUser) {
-            res.render('confirmation', { user: latestUser });
+        if (user) {
+            res.render('confirmation', { user: user });
         } else {
-            res.send("No registration details found. Please register first.");
+            return res.redirect('/?error=Ticket not found. Please login again.');
         }
     } catch (err) {
         console.error(err);
-        res.status(500).send("Error fetching confirmation.");
+        res.status(500).send("Server Error");
     }
 });
 
-// Start Server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
