@@ -10,11 +10,14 @@
     --neon-pink: #ff00de;
 }
 
-body {
-    font-family: 'Outfit', sans-serif;
-    overflow-x: hidden;
+html, body {
+    width: 100%;
+    min-height: 100vh;     /* FIXED: Allow height to grow so you can scroll */
     margin: 0;
     padding: 0;
+    overflow-x: hidden;    /* Prevents horizontal scrollbar */
+    font-family: 'Outfit', sans-serif;
+    background-color: var(--dark-bg);
 }
 
 /* Scrollbar Styling */
@@ -35,11 +38,14 @@ body {
 
 /* Navbar */
 .glass-nav {
-    background: rgba(15, 12, 41, 0.9);
+    background: rgba(15, 12, 41, 0.95); /* Slightly darker for better visibility */
     backdrop-filter: blur(10px);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 15px 0;
+    padding: 12px 0;
+    width: 100%;
+    z-index: 1000;
 }
+
 .nav-link {
     color: rgba(255,255,255,0.8) !important;
     font-weight: 500;
@@ -50,15 +56,18 @@ body {
 
 /* Hero Section */
 .hero-section {
-    height: 100vh;
+    position: relative;
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
     background: linear-gradient(rgba(15,12,41,0.8), rgba(15,12,41,0.9)), 
                 url('/images/banner.jpg');
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
-    display: flex;
-    align-items: center;
-    position: relative;
+    padding-top: 80px; 
+    z-index: 1;
 }
 
 .glitch-text {
@@ -68,13 +77,24 @@ body {
     letter-spacing: 2px;
     animation: glitch 1s infinite alternate;
 }
-@media (max-width: 768px) { .glitch-text { font-size: 2.5rem; } }
+
+/* Responsive Typography for Hero */
+@media (max-width: 768px) { 
+    .glitch-text { font-size: 2.5rem; } 
+    .hero-section { text-align: center; padding: 100px 15px; }
+    .hero-section .lead { font-size: 1rem; }
+}
 
 /* About Section Styles */
 .about-section {
-    background-color: #161625; /* Slightly lighter than event section */
+    background-color: #161625;
     color: white;
+    width: 100%;
+    position: relative; /* Ensures it sits in document flow */
+    z-index: 2;         /* Ensures it sits above any fixed background issues */
+    padding: 80px 0;
 }
+
 .bg-glass {
     background: rgba(0, 0, 0, 0.7);
     backdrop-filter: blur(10px);
@@ -91,6 +111,7 @@ body {
     font-weight: 600;
     box-shadow: 0 0 15px rgba(0, 114, 255, 0.5);
     transition: transform 0.3s;
+    white-space: nowrap;
 }
 .btn-glow:hover {
     transform: translateY(-3px);
@@ -99,7 +120,14 @@ body {
 }
 
 /* Event Cards (Home) */
-.event-section { background-color: #0b0b14; color: white; }
+.event-section { 
+    background-color: #0b0b14; 
+    color: white; 
+    width: 100%;
+    position: relative;
+    z-index: 2;
+    padding: 80px 0;
+}
 
 .custom-card {
     background: #161625;
@@ -108,6 +136,10 @@ body {
     padding: 30px;
     transition: 0.4s;
     height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 .custom-card:hover {
     transform: translateY(-10px);
@@ -117,7 +149,14 @@ body {
 .card-icon { margin-bottom: 20px; }
 
 /* Footer */
-footer { background: #050508; color: #888; padding: 40px 0; }
+footer { 
+    background: #050508; 
+    color: #888; 
+    padding: 40px 0; 
+    width: 100%; 
+    position: relative;
+    z-index: 2;
+}
 
 /* =========================================
    REGISTRATION PAGE STYLES (register.ejs)
@@ -127,8 +166,9 @@ footer { background: #050508; color: #888; padding: 40px 0; }
     background: linear-gradient(45deg, #0f0c29, #302b63, #24243e);
     min-height: 100vh;
     position: relative;
-    padding-top: 50px;
+    padding-top: 80px; 
     padding-bottom: 50px;
+    width: 100%;
 }
 
 /* Floating Animated Background Circles */
@@ -166,6 +206,7 @@ footer { background: #050508; color: #888; padding: 40px 0; }
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 20px;
+    width: 100%;
 }
 
 /* Glass Inputs */
@@ -184,16 +225,14 @@ footer { background: #050508; color: #888; padding: 40px 0; }
 }
 .glass-input::placeholder { color: rgba(255, 255, 255, 0.4); }
 
-.form-floating label {
-    color: rgba(255, 255, 255, 0.6);
-}
+.form-floating label { color: rgba(255, 255, 255, 0.6); }
 .form-floating > .form-control:focus ~ label,
 .form-floating > .form-control:not(:placeholder-shown) ~ label {
     color: #00d2ff;
     transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
 }
 
-/* Icon Box for Form */
+/* Icon Box */
 .icon-box {
     width: 70px; height: 70px;
     background: var(--primary-gradient);
@@ -207,9 +246,10 @@ footer { background: #050508; color: #888; padding: 40px 0; }
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
     gap: 15px;
+    width: 100%;
 }
 
-/* Custom Event Tiles (Checkboxes) */
+/* Custom Event Tiles */
 .event-tile {
     display: flex;
     flex-direction: column;
@@ -241,7 +281,6 @@ footer { background: #050508; color: #888; padding: 40px 0; }
 }
 .btn-check:checked + .event-tile i { transform: scale(1.2); }
 
-/* Utilities */
 .hover-scale { transition: transform 0.2s; }
 .hover-scale:hover { transform: translateX(-5px); }
 .letter-spacing-1 { letter-spacing: 1px; }

@@ -13,24 +13,125 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" href="/css/style.css">
     <style>
-        body { background: #0f0c29; background: linear-gradient(to right, #24243e, #302b63, #0f0c29); min-height: 100vh; display: flex; align-items: center; justify-content: center; font-family: 'Segoe UI', sans-serif; overflow: hidden; margin: 0; }
-        .confetti { position: absolute; width: 12px; height: 12px; background-color: #f00; animation: confetti-fall 4s linear infinite; top: -10vh; z-index: 1; }
-        @keyframes confetti-fall { 0% { transform: translateY(0) rotate(0deg) scale(1); opacity: 1; } 100% { transform: translateY(110vh) rotate(720deg) scale(0.5); opacity: 0; } }
-        .success-card { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); max-width: 480px; width: 90%; text-align: center; position: relative; z-index: 10; overflow: hidden; transition: transform 0.3s ease; }
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* strictly prevent scrollbars */
+        }
+
+        body { 
+            background: #0f0c29; 
+            background: linear-gradient(to right, #24243e, #302b63, #0f0c29); 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-family: 'Segoe UI', sans-serif; 
+        }
+
+        /* --- OPTIMIZED CONFETTI CONTAINER --- */
+        #confetti-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 20;
+        }
+
+        .confetti { 
+            position: absolute; 
+            width: 12px; 
+            height: 12px; 
+            background-color: #f00; 
+            animation: confetti-fall 4s linear infinite; 
+            top: -10vh; 
+            will-change: transform; 
+        }
+
+        @keyframes confetti-fall { 
+            0% { transform: translateY(0) rotate(0deg) scale(1); opacity: 1; } 
+            100% { transform: translateY(110vh) rotate(720deg) scale(0.5); opacity: 0; } 
+        }
+
+        .success-card { 
+            background: rgba(255, 255, 255, 0.1); 
+            backdrop-filter: blur(15px); 
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2); 
+            border-radius: 24px; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5); 
+            max-width: 480px; 
+            width: 90%; 
+            text-align: center; 
+            position: relative; 
+            z-index: 10; 
+            transition: transform 0.3s ease; 
+        }
+        
         .success-card:hover { transform: translateY(-5px); }
-        .success-card::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent); transition: 0.5s; pointer-events: none; }
+        
+        .success-card::before { 
+            content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; 
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent); 
+            transition: 0.5s; pointer-events: none; 
+        }
+        
         .success-card:hover::before { left: 100%; }
-        .check-icon-circle { width: 110px; height: 110px; background: linear-gradient(135deg, rgba(40, 167, 69, 0.2), rgba(40, 167, 69, 0.05)); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 25px; border: 2px solid #28a745; box-shadow: 0 0 30px rgba(40, 167, 69, 0.3); animation: pulse-green 2s infinite; }
-        @keyframes pulse-green { 0% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.4); } 70% { box-shadow: 0 0 0 15px rgba(40, 167, 69, 0); } }
         
-        .btn-home { background: linear-gradient(45deg, #00c6ff, #0072ff); border: none; color: white; padding: 14px 40px; border-radius: 50px; text-transform: uppercase; font-weight: 800; letter-spacing: 1.5px; transition: all 0.4s ease; box-shadow: 0 5px 15px rgba(0, 198, 255, 0.4); display: inline-block; text-decoration: none; position: relative; overflow: hidden; width: 100%; }
-        .btn-home:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 10px 30px rgba(0, 198, 255, 0.6); color: white; opacity: 1; }
+        .check-icon-circle { 
+            width: 110px; height: 110px; 
+            background: linear-gradient(135deg, rgba(40, 167, 69, 0.2), rgba(40, 167, 69, 0.05)); 
+            border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; 
+            margin: 0 auto 25px; 
+            border: 2px solid #28a745; 
+            box-shadow: 0 0 30px rgba(40, 167, 69, 0.3); 
+            animation: pulse-green 2s infinite; 
+        }
         
-        h2.success-title { background: linear-gradient(to right, #fff, #a5b4fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 2.5rem; }
+        @keyframes pulse-green { 
+            0% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.4); } 
+            70% { box-shadow: 0 0 0 15px rgba(40, 167, 69, 0); } 
+        }
+        
+        .btn-home { 
+            background: linear-gradient(45deg, #00c6ff, #0072ff); 
+            border: none; color: white; 
+            padding: 14px 40px; 
+            border-radius: 50px; 
+            text-transform: uppercase; 
+            font-weight: 800; 
+            letter-spacing: 1.5px; 
+            transition: all 0.4s ease; 
+            box-shadow: 0 5px 15px rgba(0, 198, 255, 0.4); 
+            display: inline-block; 
+            text-decoration: none; 
+            position: relative; 
+            overflow: hidden; 
+            width: 100%; 
+        }
+        
+        .btn-home:hover { 
+            transform: translateY(-3px) scale(1.02); 
+            box-shadow: 0 10px 30px rgba(0, 198, 255, 0.6); 
+            color: white; opacity: 1; 
+        }
+        
+        h2.success-title { 
+            background: linear-gradient(to right, #fff, #a5b4fc); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+            font-size: 2.5rem; 
+        }
     </style>
 </head>
 <body>
+    <!-- Container for confetti -->
     <div id="confetti-container"></div>
+    
     <div class="container d-flex justify-content-center">
         <div class="success-card p-5 animate__animated animate__backInDown">
             
@@ -47,7 +148,7 @@
 
             <div class="row g-3 animate__animated animate__fadeInUp animate__delay-2s">
                 <div class="col-12">
-                    <!-- Link to Home - Now the Primary Action -->
+                    <!-- Link to Home -->
                     <a href="/home?registered=true&event_id=<%= event_id %>" class="btn btn-home">
                         <i class="fas fa-home me-2"></i> Go to Home
                     </a>
@@ -61,29 +162,39 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
     <script>
-        // --- 1. AUTO-SAVE SESSION (CRITICAL) ---
-        // Save the new ID so the Home page knows you are logged in
+        // --- 1. AUTO-SAVE SESSION ---
         localStorage.setItem('sympo_event_id', '<%= event_id %>');
         console.log("✅ Registration Complete. ID Saved: <%= event_id %>");
 
-        // --- 2. CONFETTI SCRIPT ---
+        // --- 2. OPTIMIZED CONFETTI SCRIPT ---
         function createConfetti() {
             const container = document.getElementById('confetti-container');
             const colors = ['#00c6ff', '#0072ff', '#ff0057', '#e4ff00', '#00ff73', '#ff00cc'];
             
-            for(let i=0; i<80; i++) {
+            // Reduced particle count from 80 to 50 for better performance
+            for(let i=0; i<50; i++) {
                 const div = document.createElement('div');
                 div.classList.add('confetti');
-                div.style.left = Math.random() * 100 + 'vw';
+                div.style.left = Math.random() * 100 + '%'; // Use % instead of vw for container
                 div.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-                const size = Math.random() * 8 + 6 + 'px'; div.style.width = size; div.style.height = size;
+                
+                const size = Math.random() * 8 + 6 + 'px'; 
+                div.style.width = size; 
+                div.style.height = size;
+                
                 div.style.animationDuration = (Math.random() * 3 + 2) + 's';
                 div.style.animationDelay = (Math.random() * 5) + 's';
+                
                 if(Math.random() > 0.5) { div.style.borderRadius = '50%'; }
+                
                 container.appendChild(div);
             }
         }
-        createConfetti();
+        
+        // Wait for frame to be ready before animating to prevent initial jank
+        requestAnimationFrame(() => {
+            createConfetti();
+        });
     </script>
 </body>
 </html>

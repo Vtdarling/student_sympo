@@ -11,29 +11,30 @@
 </head>
 <body style="background-color: #0f0c29; color: white;">
 
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg fixed-top glass-nav">
-        <div class="container">
+    <nav class="navbar navbar-expand-lg fixed-top glass-nav py-2">
+        <div class="container-fluid px-3 d-flex align-items-center">
+            
             <a class="navbar-brand fw-bold text-white fs-4" href="#">
                 <i class="fas fa-atom text-info me-2"></i> TECHSYM '26
             </a>
-            <button class="navbar-toggler bg-light" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+            
+            <a href="/logout" onclick="logout()" class="d-lg-none btn btn-outline-danger px-3 rounded-pill fw-bold ms-auto">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+            
             <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
                 <ul class="navbar-nav align-items-center">
                     <li class="nav-item"><a class="nav-link" href="#hero">Home</a></li>
                     <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
                     <li class="nav-item"><a class="nav-link" href="#events">Events</a></li>
                     
-                    <li class="nav-item ms-lg-3">
+                    <li class="nav-item ms-lg-3 my-2 my-lg-0 d-none d-lg-block">
                         <a href="/logout" onclick="logout()" class="btn btn-sm btn-outline-danger px-3 rounded-pill fw-bold">
                             <i class="fas fa-sign-out-alt me-1"></i> Logout
                         </a>
                     </li>
 
-                    <li class="nav-item">
-                        <!-- ID: nav-cta-btn -->
+                    <li class="nav-item my-2 my-lg-0">
                         <% if (typeof registered !== 'undefined' && registered) { %>
                              <button id="nav-cta-btn" class="btn btn-success ms-lg-3 fw-bold" onclick="viewTicket('<%= typeof event_id !== 'undefined' ? event_id : '' %>')">
                                 <i class="fas fa-check-circle me-2"></i>Ticket
@@ -47,18 +48,16 @@
         </div>
     </nav>
 
-    <!-- HERO SECTION -->
     <header id="hero" class="hero-section text-center text-white">
-        <div class="container" data-aos="zoom-in" data-aos-duration="1200">
+        <div class="container-fluid px-3" data-aos="zoom-in" data-aos-duration="1200">
             <div class="row justify-content-center">
-                <div class="col-lg-8">
+                <div class="col-12">
                     <h5 class="text-uppercase text-info letter-spacing-1 mb-3">Department of IT Presents</h5>
                     <h1 class="glitch-text mb-4">SYMPOSIUM 2026</h1>
                     <p class="lead mb-5 text-white-50">Join the ultimate convergence of code, creativity, and innovation.</p>
                     <div class="d-flex justify-content-center gap-3">
                         <a href="#about" class="btn btn-outline-light rounded-pill px-4 py-2">Learn More</a>
                         
-                        <!-- ID: hero-cta-btn -->
                         <% if (typeof registered !== 'undefined' && registered) { %>
                             <button id="hero-cta-btn" onclick="viewTicket('<%= typeof event_id !== 'undefined' ? event_id : '' %>')" class="btn btn-success btn-lg">
                                 <i class="fas fa-check-circle me-2"></i>View Ticket
@@ -72,7 +71,6 @@
         </div>
     </header>
 
-    <!-- ABOUT SECTION -->
     <section id="about" class="about-section py-5 position-relative">
         <div class="container py-5">
             <div class="row align-items-center">
@@ -114,7 +112,6 @@
         </div>
     </section>
 
-    <!-- EVENTS SECTION -->
     <section id="events" class="event-section py-5">
         <div class="container py-5">
             <div class="text-center mb-5" data-aos="fade-up">
@@ -123,7 +120,6 @@
                 <p class="text-white-50">Technical & Non-Technical Challenges</p>
             </div>
 
-            <!-- Technical Events -->
             <h3 class="text-info mb-4" data-aos="fade-right"><i class="fas fa-microchip me-2"></i> Technical Events</h3>
             <div class="row g-4 mb-5">
                 <div class="col-md-4" data-aos="flip-left" data-aos-delay="100">
@@ -152,7 +148,6 @@
                 </div>
             </div>
 
-            <!-- Non-Technical Events -->
             <h3 class="text-warning mb-4" data-aos="fade-right"><i class="fas fa-gamepad me-2"></i> Non-Technical Events</h3>
             <div class="row g-4">
                 <div class="col-md-4" data-aos="flip-left" data-aos-delay="400">
@@ -181,11 +176,9 @@
                 </div>
             </div>
 
-            <!-- CTA -->
             <div class="text-center mt-5" data-aos="zoom-in">
-                <!-- ID: bottom-cta-btn -->
                 <% if (typeof registered !== 'undefined' && registered) { %>
-                     <button id="bottom-cta-btn" onclick="viewTicket('<%= typeof event_id !== 'undefined' ? event_id : '' %>')" class="btn btn-success px-5 py-3 fs-5">
+                      <button id="bottom-cta-btn" onclick="viewTicket('<%= typeof event_id !== 'undefined' ? event_id : '' %>')" class="btn btn-success px-5 py-3 fs-5">
                         <i class="fas fa-check-circle me-2"></i>View Ticket
                     </button>
                 <% } else { %>
@@ -205,49 +198,38 @@
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script> AOS.init(); </script>
 
-    <!-- ROBUST TICKET REDIRECT SCRIPT -->
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            // 1. Capture ID from URL if present (Server priority)
             const urlParams = new URLSearchParams(window.location.search);
             const serverEventId = urlParams.get('event_id');
             const registered = urlParams.get('registered');
 
-            // 2. Save to Memory if valid
             if (serverEventId && registered === 'true') {
                 localStorage.setItem('sympo_event_id', serverEventId);
             }
 
-            // 3. Update buttons based on Memory (Client priority)
             const storedEventId = localStorage.getItem('sympo_event_id');
             if (storedEventId) {
                 updateButtonsToTicketMode(storedEventId);
             }
         });
 
-        // The Smart Navigation Function
         function viewTicket(fallbackId) {
-            // Priority 1: Check Local Storage
             let targetId = localStorage.getItem('sympo_event_id');
 
-            // Priority 2: Check what the button has (EJS variable)
             if (!targetId && fallbackId && fallbackId.length > 0) {
                 targetId = fallbackId;
-                // Save it for next time
                 localStorage.setItem('sympo_event_id', targetId);
             }
 
-            // Priority 3: Check URL params
             if (!targetId) {
                 const urlParams = new URLSearchParams(window.location.search);
                 targetId = urlParams.get('event_id');
             }
 
             if (targetId) {
-                // Success: Go to ticket
                 window.location.href = `/confirmation?event_id=${targetId}`;
             } else {
-                // Failure: No ID found anywhere -> Go to login
                 alert("Session expired. Please login again.");
                 window.location.href = "/";
             }
@@ -260,7 +242,6 @@
             const updateBtn = (id, addClass = "") => {
                 const btn = document.getElementById(id);
                 if (btn) {
-                    // Convert <a> to look and act like the smart button
                     btn.removeAttribute("href"); 
                     btn.className = `${btnClass} ${addClass}`;
                     btn.innerHTML = btnHtml;
