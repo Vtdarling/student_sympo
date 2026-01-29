@@ -13,15 +13,28 @@ const { body, validationResult } = require('express-validator');
 
 const app = express();
 
-/* ---------------- PROXY TRUST ---------------- */
+/* ---------------------------------------------------------
+   1. PROXY SETTINGS (CRITICAL FOR CLOUD DEPLOYMENT)
+   This tells Express to trust the load balancer (Render/Heroku/Railway).
+   Without this, secure cookies will fail in production.
+--------------------------------------------------------- */
 app.set('trust proxy', 1);
 
-/* ---------------- DATABASE ---------------- */
+/* ---------------------------------------------------------
+   2. DATABASE CONNECTION
+--------------------------------------------------------- */
+if (!process.env.MONGO_URI) {
+    console.error('❌ FATAL ERROR: MONGO_URI is not defined in .env');
+    process.exit(1);
+}
+
 mongoose.connect(process.env.MONGO_URI)
     .then(() => console.log('✅ MongoDB Connected'))
-    .catch(err => console.error('❌ Mongo Error:', err));
+    .catch(err => console.error('❌ Mongo Connection Error:', err));
 
-/* ---------------- SECURITY MIDDLEWARE ---------------- */
+/* ---------------------------------------------------------
+   3. SECURITY MIDDLEWARE (HELMET)
+--------------------------------------------------------- */
 app.use(helmet({
     contentSecurityPolicy: {
         directives: {
@@ -41,47 +54,69 @@ app.use(helmet({
         includeSubDomains: true,
         preload: true
     },
-    frameguard: {
-        action: 'deny'
-    },
+    frameguard: { action: 'deny' },
     noSniff: true,
-    referrerPolicy: {
-        policy: 'strict-origin-when-cross-origin'
-    }
+    referrerPolicy: { policy: 'strict-origin-when-cross-origin' }
 }));
 
+/* ---------------------------------------------------------
+   4. GENERAL MIDDLEWARE
+--------------------------------------------------------- */
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static('public'));
 app.set('view engine', 'ejs');
 
-/* ---------------- SESSION ---------------- */
+/* ---------------------------------------------------------
+   5. SESSION CONFIGURATION
+--------------------------------------------------------- */
+if (!process.env.SESSION_SECRET) {
+    console.error('❌ FATAL ERROR: SESSION_SECRET is not defined in .env');
+    process.exit(1);
+}
+
+// Determine environment
+const isProduction = process.env.NODE_ENV === 'production';
+
+// Log environment status for debugging
+if (isProduction) {
+    console.log('🔒 Production mode: Secure cookies enabled (HTTPS required)');
+    console.log('   ⚠️ WARNING: If you are running on HTTP (localhost), you MUST set NODE_ENV=development or login will fail.');
+} else {
+    console.log('🚧 Development mode: Secure cookies disabled (HTTP allowed)');
+}
+
 app.use(session({
     name: 'symposium.sid',
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     store: MongoStore.create({
-        mongoUrl: process.env.MONGO_URI
+        mongoUrl: process.env.MONGO_URI,
+        ttl: 14 * 24 * 60 * 60 // 14 days expiration
     }),
     cookie: {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict', // Prevent CSRF attacks
+        httpOnly: true, // Prevents client-side JS from reading the cookie
+        // Secure is TRUE in production (HTTPS), FALSE in development (HTTP)
+        secure: isProduction, 
+        sameSite: 'strict', // CSRF protection
         maxAge: 1000 * 60 * 30 // 30 Minutes
     }
 }));
 
-/* ---------------- CSRF PROTECTION ---------------- */
+/* ---------------------------------------------------------
+   6. CSRF & RATE LIMITING
+--------------------------------------------------------- */
 const csrfProtection = csrf();
 
-/* ---------------- RATE LIMITING ---------------- */
 const loginLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 10,
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 10, // Limit each IP to 10 requests per windowMs
     message: "Too many login attempts. Please try again after 15 minutes."
 });
 
-/* ---------------- DB SCHEMA ---------------- */
+/* ---------------------------------------------------------
+   7. DATABASE MODELS
+--------------------------------------------------------- */
 const userSchema = new mongoose.Schema({
     event_id: { type: String, unique: true },
     name: String,
@@ -97,7 +132,9 @@ const userSchema = new mongoose.Schema({
 
 const User = mongoose.model('User', userSchema);
 
-/* ---------------- HELPERS ---------------- */
+/* ---------------------------------------------------------
+   8. HELPER FUNCTIONS
+--------------------------------------------------------- */
 function isAuth(req, res, next) {
     if (!req.session.userId) {
         return res.redirect('/?error=Please login');
@@ -105,9 +142,11 @@ function isAuth(req, res, next) {
     next();
 }
 
-/* ---------------- ROUTES ---------------- */
+/* ---------------------------------------------------------
+   9. ROUTES
+--------------------------------------------------------- */
 
-// LOGIN PAGE
+// --- LOGIN PAGE ---
 app.get('/', csrfProtection, (req, res) => {
     res.render('login', {
         error: req.query.error || null,
@@ -115,9 +154,8 @@ app.get('/', csrfProtection, (req, res) => {
     });
 });
 
-// LOGIN LOGIC
-app.post(
-    '/login',
+// --- LOGIN LOGIC ---
+app.post('/login',
     loginLimiter,
     csrfProtection,
     body('email').isEmail().normalizeEmail(),
@@ -136,14 +174,13 @@ app.post(
                 return res.redirect('/?error=Account not found. Please Register first.');
             }
 
-            // Regenerate session to prevent session fixation attacks
+            // Regenerate session to prevent session fixation
             req.session.regenerate((err) => {
                 if (err) {
                     console.error('Session regeneration error:', err);
                     return res.redirect('/?error=Server error');
                 }
                 
-                // Set userId only after successful regeneration
                 req.session.userId = user._id;
                 req.session.save((saveErr) => {
                     if (saveErr) {
@@ -160,7 +197,7 @@ app.post(
     }
 );
 
-// SIGNUP PAGE
+// --- SIGNUP PAGE ---
 app.get('/signup', csrfProtection, (req, res) => {
     res.render('signup', {
         error: null,
@@ -168,7 +205,7 @@ app.get('/signup', csrfProtection, (req, res) => {
     });
 });
 
-// SIGNUP LOGIC
+// --- SIGNUP LOGIC ---
 app.post('/signup', 
     csrfProtection,
     body('email').isEmail().normalizeEmail(),
@@ -203,7 +240,6 @@ app.post('/signup',
             });
 
             await user.save();
-
             res.redirect('/?error=Account created! Please login to complete registration.');
 
         } catch (err) {
@@ -213,7 +249,7 @@ app.post('/signup',
     }
 );
 
-// HOME PAGE
+// --- HOME PAGE (DASHBOARD) ---
 app.get('/home', isAuth, async (req, res) => {
     try {
         const user = await User.findById(req.session.userId);
@@ -236,7 +272,7 @@ app.get('/home', isAuth, async (req, res) => {
     }
 });
 
-// REGISTER PAGE (Pre-fill)
+// --- REGISTRATION PAGE ---
 app.get('/register', csrfProtection, async (req, res) => {
     let user = null;
     if (req.session.userId) {
@@ -249,7 +285,7 @@ app.get('/register', csrfProtection, async (req, res) => {
     });
 });
 
-// 🛡️ UPDATED REGISTER LOGIC: DUPLICATE CHECK ADDED
+// --- REGISTRATION LOGIC ---
 app.post('/register', 
     csrfProtection,
     body('college').trim().escape(),
@@ -262,22 +298,20 @@ app.post('/register',
             if (!currentUser) return res.redirect('/logout');
 
             // 1. DUPLICATE CHECK
-            // Check if Transaction ID matches any OTHER user (exclude current user)
             const conflict = await User.findOne({
-                _id: { $ne: currentUser._id }, // Not equal to current user
+                _id: { $ne: currentUser._id },
                 transaction_id: req.body.transaction_id
             });
 
             if (conflict) {
-                // Return to register page with error
                 return res.render('register', {
                     error: "⚠️ Transaction ID is already used by another participant.",
                     csrfToken: req.csrfToken(),
-                    user: currentUser // Keep form pre-filled
+                    user: currentUser
                 });
             }
 
-            // 2. GENERATE ID (If needed)
+            // 2. GENERATE ID (If currently temp)
             if (currentUser.event_id.startsWith('TEMP_')) {
                 const lastUser = await User.findOne({ 
                     event_id: { $regex: /^sympo121/ } 
@@ -301,12 +335,10 @@ app.post('/register',
             currentUser.transaction_id = req.body.transaction_id;
 
             await currentUser.save();
-            
             return res.render('success', { name: currentUser.name, event_id: currentUser.event_id });
 
         } catch (err) {
             console.error(err);
-            // Fallback for unexpected errors
             const user = await User.findById(req.session.userId);
             res.render('register', {
                 error: "System error. Please verify input and try again.",
@@ -317,7 +349,7 @@ app.post('/register',
     }
 );
 
-// CONFIRMATION TICKET
+// --- CONFIRMATION TICKET ---
 app.get('/confirmation', isAuth, async (req, res) => {
     try {
         const user = await User.findById(req.session.userId);
@@ -328,10 +360,26 @@ app.get('/confirmation', isAuth, async (req, res) => {
     }
 });
 
-// LOGOUT
+// --- LOGOUT ---
 app.get('/logout', (req, res) => {
     req.session.destroy(() => res.redirect('/'));
 });
 
+// --- ERROR HANDLING ---
+app.use((err, req, res, next) => {
+    if (err.code === 'EBADCSRFTOKEN') {
+        // Handle CSRF token errors here
+        console.error('⚠️ CSRF Error: Session invalid or form tampered.');
+        if (process.env.NODE_ENV === 'production') {
+             console.error('   ↳ Caused by: Production mode blocks cookies on localhost (HTTP). Switch to development mode.');
+        }
+        return res.redirect('/?error=Session expired. Please try again.');
+    }
+    next(err);
+});
+
+/* ---------------------------------------------------------
+   10. SERVER START
+--------------------------------------------------------- */
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
