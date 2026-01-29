@@ -30,9 +30,25 @@ app.use(helmet({
             styleSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net", "https://unpkg.com", "https://cdnjs.cloudflare.com", "https://fonts.googleapis.com"],
             fontSrc: ["'self'", "https://cdnjs.cloudflare.com", "https://fonts.gstatic.com"],
             imgSrc: ["'self'", "data:", "https:", "https://api.qrserver.com"],
+            connectSrc: ["'self'"],
+            frameSrc: ["'none'"],
+            objectSrc: ["'none'"],
             upgradeInsecureRequests: [],
         },
     },
+    hsts: {
+        maxAge: 31536000, // 1 year
+        includeSubDomains: true,
+        preload: true
+    },
+    frameguard: {
+        action: 'deny'
+    },
+    noSniff: true,
+    xssFilter: true,
+    referrerPolicy: {
+        policy: 'strict-origin-when-cross-origin'
+    }
 }));
 
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -51,6 +67,7 @@ app.use(session({
     cookie: {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict', // Prevent CSRF attacks
         maxAge: 1000 * 60 * 30 // 30 Minutes
     }
 }));
@@ -120,8 +137,16 @@ app.post(
                 return res.redirect('/?error=Account not found. Please Register first.');
             }
 
-            req.session.userId = user._id;
-            res.redirect('/home');
+            // Regenerate session to prevent session fixation attacks
+            req.session.regenerate((err) => {
+                if (err) {
+                    console.error('Session regeneration error:', err);
+                    return res.redirect('/?error=Server error');
+                }
+                
+                req.session.userId = user._id;
+                res.redirect('/home');
+            });
         } catch (err) {
             console.error(err);
             res.redirect('/?error=Server error');
