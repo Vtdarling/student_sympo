@@ -45,7 +45,6 @@ app.use(helmet({
         action: 'deny'
     },
     noSniff: true,
-    xssFilter: true,
     referrerPolicy: {
         policy: 'strict-origin-when-cross-origin'
     }
@@ -144,11 +143,18 @@ app.post(
                     return res.redirect('/?error=Server error');
                 }
                 
+                // Set userId only after successful regeneration
                 req.session.userId = user._id;
-                res.redirect('/home');
+                req.session.save((saveErr) => {
+                    if (saveErr) {
+                        console.error('Session save error:', saveErr);
+                        return res.redirect('/?error=Server error');
+                    }
+                    res.redirect('/home');
+                });
             });
         } catch (err) {
-            console.error(err);
+            console.error('Login error:', err);
             res.redirect('/?error=Server error');
         }
     }
