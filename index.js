@@ -24,7 +24,7 @@ app.set('trust proxy', 1);
    2. DATABASE CONNECTION
 --------------------------------------------------------- */
 if (!process.env.MONGO_URI) {
-    console.error('❌ FATAL ERROR: MONGO_URI is not defined in .env');
+    console.error('❌ FATAL ERROR: MONGO_URI is not defined in .env (or Environment Variables)');
     process.exit(1);
 }
 
@@ -70,7 +70,7 @@ app.set('view engine', 'ejs');
    5. SESSION CONFIGURATION
 --------------------------------------------------------- */
 if (!process.env.SESSION_SECRET) {
-    console.error('❌ FATAL ERROR: SESSION_SECRET is not defined in .env');
+    console.error('❌ FATAL ERROR: SESSION_SECRET is not defined in .env (or Environment Variables)');
     process.exit(1);
 }
 
@@ -365,10 +365,9 @@ app.get('/logout', (req, res) => {
     req.session.destroy(() => res.redirect('/'));
 });
 
-// --- ERROR HANDLING ---
+// --- ERROR HANDLING (CRITICAL FOR CSRF) ---
 app.use((err, req, res, next) => {
     if (err.code === 'EBADCSRFTOKEN') {
-        // Handle CSRF token errors here
         console.error('⚠️ CSRF Error: Session invalid or form tampered.');
         if (process.env.NODE_ENV === 'production') {
              console.error('   ↳ Caused by: Production mode blocks cookies on localhost (HTTP). Switch to development mode.');
