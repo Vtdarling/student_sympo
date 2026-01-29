@@ -52,8 +52,10 @@ All security controls are properly implemented and functioning as expected.
 **Status:** ✅ **Mostly Resolved**
 
 #### Fixed Vulnerabilities:
-- ✅ **lodash** - Prototype Pollution (Moderate) - FIXED
-- ✅ **qs** - DoS via memory exhaustion (High) - FIXED
+- ✅ **lodash** - Prototype Pollution (Moderate) - FIXED via npm audit fix
+- ✅ **qs** - DoS via memory exhaustion (High) - FIXED via npm audit fix
+
+**Note:** Running `npm audit fix` automatically updated transitive dependencies (lodash@4.17.23, qs@6.14.1) to versions that address these vulnerabilities.
 
 #### Remaining Low-Severity Issues:
 | Package | Severity | Issue | Risk Level | Mitigation |
@@ -490,11 +492,11 @@ Before deploying to production, ensure:
 
 ### Vulnerabilities Found and Fixed
 
-| Date | Type | Severity | Status |
-|------|------|----------|--------|
-| 2026-01-29 | Lodash Prototype Pollution | Moderate | ✅ Fixed |
-| 2026-01-29 | QS DoS Vulnerability | High | ✅ Fixed |
-| Previous | Credentials in Git | Critical | ✅ Fixed (from previous audit) |
+| Date | Type | Severity | Status | Fix Method |
+|------|------|----------|--------|------------|
+| 2026-01-29 | Lodash Prototype Pollution | Moderate | ✅ Fixed | npm audit fix (transitive dependency) |
+| 2026-01-29 | QS DoS Vulnerability | High | ✅ Fixed | npm audit fix (transitive dependency) |
+| Previous | Credentials in Git | Critical | ✅ Fixed | Removed from git, added .gitignore |
 
 ### Current Security Posture
 
